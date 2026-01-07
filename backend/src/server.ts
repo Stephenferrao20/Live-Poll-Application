@@ -1,9 +1,11 @@
-require("dotenv").config();
-const http = require("http");
-const { Server } = require("socket.io");
-const app = require("./app");
-const connectDB = require("./config/db");
-const pollSocket = require("./sockets/poll.socket");
+import http from "http";
+import { Server } from "socket.io";
+import dotenv from "dotenv";
+import app from "./app.ts";
+import connectDB from "./config/db.ts";
+import pollSocket from "./sockets/poll.socket.ts";
+dotenv.config();
+
 
 connectDB();
 

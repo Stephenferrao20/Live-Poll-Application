@@ -1,40 +1,44 @@
-const Poll = require("../models/Poll");
-const Vote = require("../models/Vote");
-const { Types } = require("mongoose");
-import type { CreatePollInput, SubmitVoteInput } from "../types/service.types";
-
-
+import { Types } from "mongoose";
+import { PollModel } from "../models/Poll.ts";
+import { VoteModel } from "../models/Vote.ts";
+import type {
+  CreatePollInput,
+  SubmitVoteInput,
+} from "../types/service.types.ts";
+import type { Server } from "socket.io";
 
 class PollService {
+  /* ---------- Poll ---------- */
+
   static async getActivePoll() {
-    return await Poll.findOne({ status: "ACTIVE" });
+    return PollModel.findOne({ status: "ACTIVE" });
   }
 
   static async createPoll(data: CreatePollInput) {
-    const activePoll = await Poll.findOne({ status: "ACTIVE" });
+    const activePoll = await PollModel.findOne({ status: "ACTIVE" });
     if (activePoll) {
       throw new Error("Another poll is already active");
     }
 
-    const poll = await Poll.create({
+    return PollModel.create({
       ...data,
       startedAt: new Date(),
     });
-
-    return poll;
   }
 
   static getRemainingTime(poll: any): number {
     const elapsed = Math.floor(
-      (Date.now() - new Date(poll.startedAt).getTime()) / 1000
+      (Date.now() - poll.startedAt.getTime()) / 1000
     );
     return Math.max(poll.duration - elapsed, 0);
   }
 
+  /* ---------- Voting ---------- */
+
   static async submitVote(data: SubmitVoteInput) {
     const { pollId, studentId, optionId } = data;
 
-    const existingVote = await Vote.findOne({
+    const existingVote = await VoteModel.findOne({
       pollId: new Types.ObjectId(pollId),
       studentId,
     });
@@ -43,38 +47,47 @@ class PollService {
       throw new Error("Student already voted");
     }
 
-    await Vote.create({
+    await VoteModel.create({
       pollId,
       studentId,
       optionId,
     });
 
-    await Poll.updateOne(
+    await PollModel.updateOne(
       { _id: pollId, "options.optionId": optionId },
       { $inc: { "options.$.votes": 1 } }
     );
   }
 
+  /* ---------- Poll End ---------- */
+
   static async endPoll(pollId: string) {
-    await Poll.findByIdAndUpdate(pollId, { status: "ENDED" });
+    await PollModel.findByIdAndUpdate(pollId, {
+      status: "ENDED",
+    });
   }
 
-  static async checkAndEndPoll(io: any, pollId: string) {
-  const poll = await Poll.findById(pollId);
-  if (!poll || poll.status === "ENDED") return;
+  static async checkAndEndPoll(
+    io: Server,
+    pollId: string
+  ): Promise<boolean> {
+    const poll = await PollModel.findById(pollId);
+    if (!poll || poll.status === "ENDED") return false;
 
-  const elapsed =
-    Math.floor((Date.now() - poll.startedAt.getTime()) / 1000);
+    const now = Date.now();
+    const endTime =
+      poll.startedAt!.getTime() + poll.duration * 1000;
 
-  if (elapsed >= poll.duration) {
-    poll.status = "ENDED";
-    await poll.save();
+    if (now >= endTime) {
+      poll.status = "ENDED";
+      await poll.save();
 
-    io.emit("poll_ended", poll);
+      io.emit("poll_ended", poll);
+      return true; // ✅ IMPORTANT
+    }
+
+    return false;
   }
 }
 
-}
-
-
-module.exports = PollService; 
+export default PollService;

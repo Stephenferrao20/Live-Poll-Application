@@ -1,11 +1,12 @@
-const { Router } = require("express");
-const Poll = require("../models/Poll");
+import { Router } from "express";
+import { PollModel } from "../models/Poll.ts";
+
 
 const router = Router();
 
-router.get("/polls/history", async (req, res) => {
+router.get("/polls/history", async (req : any, res : any) => {
   try {
-    const polls = await Poll.find({ status: "ENDED" })
+    const polls = await PollModel.find({ status: "ENDED" })
       .sort({ createdAt: -1 })
       .lean();
 
@@ -15,4 +16,4 @@ router.get("/polls/history", async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

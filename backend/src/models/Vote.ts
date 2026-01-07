@@ -1,6 +1,6 @@
-const mongoose = require("mongoose");
-import type { Vote } from "../types/model.types";
-const { Schema } = mongoose;
+import mongoose, { Model, Schema } from "mongoose";
+import { Vote } from "../types/model.types.ts";
+
 
 const VoteSchema = new Schema(
   {
@@ -23,4 +23,6 @@ const VoteSchema = new Schema(
 
 VoteSchema.index({ pollId: 1, studentId: 1 }, { unique: true });
 
-module.exports = mongoose.model("Vote", VoteSchema);
+
+export const VoteModel: Model<Vote> =
+  mongoose.models.Vote || mongoose.model<Vote>("Vote", VoteSchema);

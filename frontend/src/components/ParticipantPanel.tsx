@@ -1,5 +1,6 @@
 import { useContext } from "react";
 import { SocketContext } from "../context/SocketContext";
+import type { Socket } from "socket.io-client";
 
 interface User {
   socketId: string;
@@ -12,7 +13,7 @@ interface ParticipantsPanelProps {
 }
 
 export default function ParticipantsPanel({ participants }: ParticipantsPanelProps) {
-  const socket = useContext(SocketContext);
+  const socket = useContext(SocketContext) as Socket | null;
   const role = sessionStorage.getItem("role");
 
   return (

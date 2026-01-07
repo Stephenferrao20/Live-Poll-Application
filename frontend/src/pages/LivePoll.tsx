@@ -3,6 +3,7 @@ import { SocketContext } from "../context/SocketContext";
 import Timer from "../components/Timer";
 import OptionItem from "../components/OptionItem";
 import Loader from "../components/Loader";
+import type { Socket } from "socket.io-client";
 
 
 interface Option {
@@ -19,7 +20,7 @@ interface Poll {
 }
 
 export default function LivePoll() {
-  const socket = useContext(SocketContext);
+  const socket = useContext(SocketContext) as Socket|null;
 
   const [poll, setPoll] = useState<Poll | null>(null);
   const [remainingTime, setRemainingTime] = useState<number>(0);

@@ -1,5 +1,6 @@
 import { useContext, useEffect, useState, useRef } from "react";
 import { SocketContext } from "../context/SocketContext";
+import type { Socket } from "socket.io-client";
 
 
 interface Message {
@@ -10,7 +11,7 @@ interface Message {
 }
 
 export default function ChatPanel() {
-  const socket = useContext(SocketContext);
+  const socket = useContext(SocketContext) as Socket | null;
   const [messages, setMessages] = useState<Message[]>([]);
   const [text, setText] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);

@@ -1,8 +1,10 @@
 import { useState, useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import OptionItem from "../components/OptionItem";
-import { SocketContext } from "../context/SocketContext";
 import { v4 as uuid } from "uuid";
+import type { Socket } from "socket.io-client";
+import { SocketContext } from "../context/SocketContext";
+
 
 interface CreatePollPayload {
   question: string;
@@ -15,7 +17,7 @@ interface CreatePollPayload {
 }
 
 export default function TeacherCreatePoll() {
-  const socket = useContext(SocketContext);
+  const socket = useContext(SocketContext) as Socket | null;
   const navigate = useNavigate();
 
   const [question, setQuestion] = useState("");

@@ -2,6 +2,7 @@ import { useState, useContext, useEffect } from "react";
 import { SocketContext } from "../context/SocketContext";
 import ChatPanel from "./ChatPanel";
 import ParticipantsPanel from "./ParticipantPanel";
+import type { Socket } from "socket.io-client";
 
 interface User {
   socketId: string;
@@ -10,7 +11,7 @@ interface User {
 }
 
 export default function ChatWidget() {
-  const socket = useContext(SocketContext);
+  const socket = useContext(SocketContext) as Socket | null;
   const [open, setOpen] = useState(false);
   const [tab, setTab] = useState<"CHAT" | "PARTICIPANTS">("CHAT");
   const [participants, setParticipants] = useState<User[]>([]);

@@ -1,6 +1,6 @@
-const mongoose = require("mongoose");
-import type { UserSession } from "../types/model.types";
-const { Schema } = mongoose;
+import mongoose, { Model, Schema } from "mongoose";
+import type { UserSession } from "../types/model.types.ts";
+
 
 const UserSessionSchema = new Schema(
   {
@@ -22,4 +22,6 @@ const UserSessionSchema = new Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model("UserSession", UserSessionSchema);
+
+export const UserSessionModel: Model<UserSession> =
+  mongoose.models.UserSession || mongoose.model<UserSession>("UserSession", UserSessionSchema);

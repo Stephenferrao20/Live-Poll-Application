@@ -1,5 +1,5 @@
-import type mongoose from "mongoose";
-import type { Document } from "mongoose";
+import mongoose, { Document } from "mongoose";
+
 
 export interface Option {
   optionId: string;

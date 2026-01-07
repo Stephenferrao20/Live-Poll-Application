@@ -1,12 +1,12 @@
-const express = require("express");
-const cors = require("cors");
-const pollRoutes = require("./routes/poll.routes");
+import express from 'express';
+import cors from 'cors';
+import pollRoutes from './routes/poll.routes.ts'
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
-app.use(pollRoutes)
+app.use(pollRoutes);
 
-module.exports = app;
+export default app;

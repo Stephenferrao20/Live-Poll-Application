@@ -2,6 +2,7 @@ import { useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { SocketContext } from "../context/SocketContext";
 import Loader from "../components/Loader";
+import type { Socket } from "socket.io-client";
 
 interface Option {
   optionId: string;
@@ -18,7 +19,7 @@ interface Poll {
 }
 export default function PollResults() {
   const navigate = useNavigate();
-  const socket = useContext(SocketContext);
+  const socket = useContext(SocketContext) as Socket | null;
   const [poll, setPoll] = useState<Poll | null>(null);
 
   const role = sessionStorage.getItem("role");
@@ -56,7 +57,7 @@ export default function PollResults() {
     return <Loader text="Waiting for poll results..." />;
   }
 
-  // Aggregate options by optionId to prevent duplicate rows if DB contains duplicates
+ 
   const aggregated: Record<
     string,
     { optionId: string; text: string; votes: number; isCorrect?: boolean }

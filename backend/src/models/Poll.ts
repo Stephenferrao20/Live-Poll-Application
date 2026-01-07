@@ -1,6 +1,6 @@
-const mongoose = require("mongoose");
-import type { Option, Poll } from "../types/model.types";
-const { Schema } = mongoose;
+import mongoose, { Model, Schema } from "mongoose";
+import type { Poll } from "../types/model.types.ts";
+
 
 const OptionSchema = new Schema({
   optionId: { type: String, required: true },
@@ -25,4 +25,5 @@ const PollSchema = new Schema(
 );
 
 
-module.exports = mongoose.model("Poll", PollSchema);
+export const PollModel: Model<Poll> =
+  mongoose.models.Poll || mongoose.model<Poll>("Poll", PollSchema);

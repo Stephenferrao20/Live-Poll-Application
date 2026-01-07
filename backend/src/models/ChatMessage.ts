@@ -1,18 +1,24 @@
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose, { Schema, Document, Model } from "mongoose";
 
-export interface ChatMessage extends Document {
+export interface IChatMessage extends Document {
   name: string;
   role: "TEACHER" | "STUDENT";
   message: string;
 }
 
-const ChatMessageSchema = new Schema<ChatMessage>(
+const ChatMessageSchema = new Schema<IChatMessage>(
   {
     name: { type: String, required: true },
-    role: { type: String, enum: ["TEACHER", "STUDENT"], required: true },
+    role: {
+      type: String,
+      enum: ["TEACHER", "STUDENT"],
+      required: true,
+    },
     message: { type: String, required: true },
   },
   { timestamps: true }
 );
 
-module.exports = mongoose.model<ChatMessage>("ChatMessage", ChatMessageSchema);
+export const ChatMessage: Model<IChatMessage> =
+  mongoose.models.ChatMessage ||
+  mongoose.model<IChatMessage>("ChatMessage", ChatMessageSchema);

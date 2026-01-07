@@ -1,11 +1,12 @@
-const { Server } = require("socket.io");
-const PollService = require("../services/poll.service");
-const UserSession = require("../models/UserSession");
-const ChatMessage = require("../models/ChatMessage");
+import { Server, Socket } from "socket.io";
+import { ChatMessage } from "../models/ChatMessage.ts";
+import { UserSessionModel } from "../models/UserSession.ts";
+import PollService from "../services/poll.service.ts";
 
 
-module.exports = function pollSocket(io) {
-  io.on("connection", (socket) => {
+
+const pollSocket = (io:Server) => {
+  io.on("connection", (socket:Socket) => {
     console.log("Client connected:", socket.id);
 
    
@@ -30,7 +31,7 @@ module.exports = function pollSocket(io) {
     });
 
    
-    socket.on("create_poll", async (data) => {
+    socket.on("create_poll", async (data: any) => {
   try {
     const activePoll = await PollService.getActivePoll();
     if (activePoll) {
@@ -45,7 +46,7 @@ module.exports = function pollSocket(io) {
     });
 
     const interval = setInterval(async () => {
-      const ended = await PollService.checkAndEndPoll(io, poll._id);
+      const ended = await PollService.checkAndEndPoll(io, poll._id.toString());
       if (ended) clearInterval(interval);
     }, 1000);
   } catch (err: any) {
@@ -55,7 +56,7 @@ module.exports = function pollSocket(io) {
 
 
    
-    socket.on("submit_vote", async (data) => {
+    socket.on("submit_vote", async (data: any) => {
       try {
         await PollService.submitVote(data);
 
@@ -66,22 +67,22 @@ module.exports = function pollSocket(io) {
       }
     });
 
-    socket.on("user_join", async ({ name, role }) => {
+    socket.on("user_join", async ({ name, role }:{name:string,role:string }) => {
     try {
-    // Delete any existing session for this socketId first
-    await UserSession.deleteOne({ socketId: socket.id });
+    // Delete any existing session 
+    await UserSessionModel.deleteOne({ socketId: socket.id });
     
     // Delete all old sessions for the same name/role to prevent duplicates from page refreshes
-    await UserSession.deleteMany({ name, role });
+    await UserSessionModel.deleteMany({ name, role });
     
     // Create new session
-    await UserSession.create({
+    await UserSessionModel.create({
       socketId: socket.id,
       name,
       role,
     });
 
-    const users = await UserSession.find().lean();
+    const users = await UserSessionModel.find().lean();
     io.emit("participants:update", users);
     } catch (err) {
     console.error(err);
@@ -89,17 +90,17 @@ module.exports = function pollSocket(io) {
   });
   
   socket.on("kick_user", async (socketId: string) => {
-  await UserSession.deleteOne({ socketId });
+  await UserSessionModel.deleteOne({ socketId });
   io.to(socketId).disconnectSockets(true);
 
-  const users = await UserSession.find().lean();
+  const users = await UserSessionModel.find().lean();
   io.emit("participants:update", users);
   });
 
 
     // Send message
-socket.on("chat:send", async ({ message }) => {
-  const session = await UserSession.findOne({ socketId: socket.id });
+socket.on("chat:send", async ({ message }:{message:string}) => {
+  const session = await UserSessionModel.findOne({ socketId: socket.id });
   if (!session) return;
 
   const chat = await ChatMessage.create({
@@ -123,12 +124,14 @@ socket.on("chat:history", async () => {
 
 
     socket.on("disconnect", async () => {
-    await UserSession.deleteOne({ socketId: socket.id });
+    await UserSessionModel.deleteOne({ socketId: socket.id });
 
-    const users = await UserSession.find().lean();
+    const users = await UserSessionModel.find().lean();
     io.emit("participants:update", users);
 
     console.log("Client disconnected:", socket.id);
     });
   });
 }
+
+export default pollSocket;
