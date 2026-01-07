@@ -2,7 +2,7 @@ import { useContext, useEffect } from "react";
 import { SocketContext } from "../context/SocketContext";
 import type { Socket } from "socket.io-client";
 
-export function useSocket(event: string, callback: (...args: any[]) => void) {
+export function useSocket(event: string, callback: (...args: unknown[]) => void) {
   const socket = useContext(SocketContext) as Socket | null;
 
   useEffect(() => {
